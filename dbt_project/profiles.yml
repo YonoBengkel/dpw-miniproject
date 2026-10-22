@@ -3,5 +3,5 @@ mini_project:
   outputs:
     dev:
       type: duckdb
-      path: D:/CODE/Data Processing Workflow/7. Mini Project/data_processing_miniproject/warehouse/warehouse.duckdb
+      path: ../warehouse/warehouse.duckdb
       threads: 4

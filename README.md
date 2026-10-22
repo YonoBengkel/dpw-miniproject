@@ -114,8 +114,9 @@ Dataset benchmark dibuat ulang di `data/bench/` dan tidak disimpan di repositori
 
 **5. Warehouse dan dbt**
 
-Berkas `dbt_project/profiles.yml` memakai path absolut ke `warehouse/warehouse.duckdb`.
-Sesuaikan nilai `path` dengan lokasi repositori di mesin Anda sebelum menjalankan dbt.
+Berkas `dbt_project/profiles.yml` menunjuk warehouse dengan path relatif
+`../warehouse/warehouse.duckdb`, sehingga perintah dbt harus dijalankan dari dalam folder
+`dbt_project` dan tidak perlu disesuaikan dengan lokasi repositori.
 
 ```powershell
 python scripts/load_duckdb.py
