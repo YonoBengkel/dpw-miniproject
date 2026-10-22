@@ -4,16 +4,6 @@ Pipeline data untuk analisis transaksi e-commerce yang menggabungkan ingestion b
 bergaya REST API, streaming melalui Apache Kafka, validasi data contract, benchmark
 transformasi, serta pemodelan analitik dengan dbt di atas DuckDB.
 
-| | |
-|---|---|
-| Mata Kuliah | Praktikum Data Processing Workflow — D4 Sains Data Terapan, PENS |
-| Mahasiswa | Ilham Bintang Satria (NRP 3324600041) |
-| Dosen Pengampu | Isbat Uzzin Nadhori, S.Kom., M.T. |
-| Teknologi | Python 3.14, Pandas, PyArrow, Pydantic 2, Polars 2, kafka-python, Apache Kafka 3.9 (KRaft, Docker), DuckDB, dbt-duckdb |
-
-Dataset `data/orders.csv` adalah data sintetis bawaan paket praktikum, bukan data
-pelanggan nyata. Enam dari 36 barisnya sengaja dibuat cacat untuk menguji data contract.
-
 ## Arsitektur
 
 ![Pipeline](docs/pipeline.png)
