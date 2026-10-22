@@ -1,0 +1,12 @@
+name: mini_project
+version: '1.0.0'
+config-version: 2
+profile: mini_project
+model-paths: [models]
+test-paths: [tests]
+models:
+  mini_project:
+    staging:
+      +materialized: view
+    marts:
+      +materialized: table

@@ -1,0 +1,10 @@
+{"order_id": "O1001", "customer_id": "C001", "order_ts": "2026-09-01T09:15:00Z", "product_category": "Electronics", "quantity": 1, "unit_price": 250.0, "discount_pct": 0.05, "payment_method": "card", "status": "paid"}
+{"order_id": "O1002", "customer_id": "C002", "order_ts": "2026-09-01T10:10:00Z", "product_category": "Home", "quantity": 2, "unit_price": 45.5, "discount_pct": 0.0, "payment_method": "transfer", "status": "shipped"}
+{"order_id": "O1003", "customer_id": "C003", "order_ts": "2026-09-01T11:05:00Z", "product_category": "Books", "quantity": 3, "unit_price": 12.99, "discount_pct": 0.1, "payment_method": "ewallet", "status": "paid"}
+{"order_id": "O1004", "customer_id": "C001", "order_ts": "2026-09-02T08:45:00Z", "product_category": "Electronics", "quantity": 1, "unit_price": 89.9, "discount_pct": 0.15, "payment_method": "card", "status": "paid"}
+{"order_id": "O1007", "customer_id": "C006", "order_ts": "2026-09-03T07:20:00Z", "product_category": "Books", "quantity": 5, "unit_price": 8.5, "discount_pct": 0.0, "payment_method": "card", "status": "paid"}
+{"order_id": "O1009", "customer_id": "C007", "order_ts": "2026-09-03T15:10:00Z", "product_category": "Electronics", "quantity": 1, "unit_price": 499.0, "discount_pct": 0.05, "payment_method": "card", "status": "refunded"}
+{"order_id": "O1005", "customer_id": "C004", "order_ts": "2026-09-02T12:00:00Z", "product_category": "Fashion", "quantity": 2, "unit_price": 39.0, "discount_pct": 0.2, "payment_method": "ewallet", "status": "cancelled"}
+{"order_id": "O1006", "customer_id": "C005", "order_ts": "2026-09-02T13:30:00Z", "product_category": "Home", "quantity": 1, "unit_price": 120.0, "discount_pct": 0.0, "payment_method": "transfer", "status": "shipped"}
+{"order_id": "O1008", "customer_id": "C002", "order_ts": "2026-09-03T09:40:00Z", "product_category": "Fashion", "quantity": 1, "unit_price": 75.0, "discount_pct": 0.1, "payment_method": "ewallet", "status": "paid"}
+{"order_id": "O1010", "customer_id": "C008", "order_ts": "2026-09-04T10:25:00Z", "product_category": "Home", "quantity": 4, "unit_price": 15.75, "discount_pct": 0.0, "payment_method": "transfer", "status": "paid"}

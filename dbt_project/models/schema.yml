@@ -1,0 +1,62 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: raw
+    description: "Record order yang telah lolos data contract."
+    tables:
+      - name: orders
+
+models:
+  - name: stg_orders
+    description: "Order bersih dengan tipe terstandardisasi dan metrik turunan."
+    columns:
+      - name: order_id
+        description: "Identitas bisnis order."
+        tests: [unique, not_null]
+      - name: net_amount
+        description: "gross_amount dikali (1 - discount_pct)."
+        tests: [not_null]
+
+  - name: dim_customer
+    description: "Dimensi pelanggan, satu baris per customer_id."
+    columns:
+      - name: customer_id
+        tests: [unique, not_null]
+
+  - name: dim_product_category
+    description: "Dimensi kategori produk, satu baris per kategori."
+    columns:
+      - name: product_category
+        tests: [unique, not_null]
+
+  - name: fct_orders
+    description: "Fakta order dengan grain satu baris per order_id."
+    columns:
+      - name: order_id
+        tests: [unique, not_null]
+      - name: customer_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_customer')
+                field: customer_id
+      - name: product_category
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_product_category')
+                field: product_category
+      - name: status
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['paid', 'shipped', 'cancelled', 'refunded']
+
+  - name: mart_daily_sales
+    description: "Agregasi penjualan harian per kategori dan metode pembayaran."
+    columns:
+      - name: order_date
+        tests: [not_null]

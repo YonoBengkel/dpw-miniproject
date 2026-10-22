@@ -1,0 +1,16 @@
+# Virtual environment dan cache Python
+.venv/
+__pycache__/
+*.pyc
+
+# Dataset benchmark dibuat ulang oleh scripts/benchmark.py dan skew_experiment.py
+data/bench/
+
+# Artefak hasil generate dbt
+dbt_project/target/
+dbt_project/logs/
+dbt_project/.user.yml
+
+# Berkas sistem
+desktop.ini
+Thumbs.db
