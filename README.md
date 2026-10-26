@@ -11,8 +11,10 @@ transformasi, serta pemodelan analitik dengan dbt di atas DuckDB.
 Jalur batch menarik record dari CSV sumber halaman demi halaman, menyimpannya ke raw
 layer Parquet, lalu memisahkan record valid dari record yang ditolak kontrak. Jalur
 streaming mengirim event yang sama lewat topic Kafka `orders` dan memvalidasinya dengan
-kontrak yang sama sebelum ditulis ke sink idempoten. Record valid dimuat ke DuckDB dan
-dimodelkan dbt menjadi star schema yang diuji dan didokumentasikan.
+kontrak yang sama sebelum ditulis ke sink idempoten. Record valid dari kedua jalur
+digabung dan ditransformasi dengan Polars (dedup per `order_id`, normalisasi timestamp,
+gross dan net amount), lalu dimuat ke DuckDB dan dimodelkan dbt menjadi star schema
+yang diuji dan didokumentasikan.
 
 ## Struktur Repositori
 
@@ -27,6 +29,7 @@ dimodelkan dbt menjadi star schema yang diuji dan didokumentasikan.
 │   ├── rejected/              record ditolak beserta alasannya
 │   ├── stream/                hasil consumer Kafka
 │   ├── stream_dup/            hasil uji duplikasi
+│   ├── transformed/           hasil transformasi Polars, sumber warehouse
 │   └── watermark.json         checkpoint incremental loading
 ├── scripts/
 │   ├── batch_ingest.py        pagination, retry + backoff + jitter, watermark
@@ -34,10 +37,12 @@ dimodelkan dbt menjadi star schema yang diuji dan didokumentasikan.
 │   ├── validate.py            validasi batch, karantina per-record, opsi fail-fast
 │   ├── producer.py            producer Kafka, key = order_id
 │   ├── consumer.py            consumer Kafka, commit setelah sink, upsert order_id
+│   ├── transform.py           gabung batch + streaming, dedup, metrik (Polars lazy)
 │   ├── benchmark.py           Pandas vs Polars eager vs Polars lazy
 │   ├── skew_experiment.py     eksperimen data skew
-│   ├── load_duckdb.py         memuat data valid ke warehouse
+│   ├── load_duckdb.py         memuat hasil transformasi ke warehouse
 │   └── run_queries.py         lima pertanyaan analitik wajib
+├── tests/test_transform.py    tes kecil untuk transform.py
 ├── warehouse/warehouse.duckdb
 ├── dbt_project/               model staging, dimensi, fakta, mart, dan tes
 ├── docs/pipeline.png          diagram arsitektur
@@ -47,6 +52,17 @@ dimodelkan dbt menjadi star schema yang diuji dan didokumentasikan.
 ## Menjalankan Ulang
 
 Seluruh perintah dijalankan dari root repositori di PowerShell, kecuali perintah dbt.
+
+Repositori ini menyimpan hasil eksekusi sebelumnya. Agar angka yang muncul sama dengan
+laporan (36 record, 30 valid, 6 ditolak), hapus dulu hasil run lama sebelum mulai:
+
+```powershell
+Remove-Item data\watermark.json, data\raw\orders.parquet, data\stream\*.jsonl, data\stream_dup\*.jsonl -ErrorAction SilentlyContinue
+```
+
+Tanpa langkah ini pipeline tetap berjalan, tetapi bersifat inkremental: run batch
+menampilkan `record baru: 1`, dan consumer menampilkan `valid (baru): 0` karena sink
+sudah berisi order yang sama. Itu perilaku idempoten yang benar, bukan error.
 
 **1. Lingkungan**
 
@@ -66,16 +82,24 @@ python scripts/validate.py
 python scripts/validate.py --fail-fast
 ```
 
-Repositori ini sudah menyimpan `data/watermark.json` dan `data/raw/orders.parquet` dari
-eksekusi sebelumnya, sehingga run berikutnya bersifat inkremental. Untuk mengulang dari
-awal, hapus kedua berkas tersebut lebih dulu.
-
 **3. Streaming Kafka** — Docker Desktop harus sudah berjalan.
 
 ```powershell
 docker compose up -d
-docker compose exec kafka /opt/kafka/bin/kafka-topics.sh --create --topic orders --bootstrap-server localhost:9092 --partitions 3 --replication-factor 1
+docker compose ps
 ```
+
+Tunggu sampai kolom STATUS menunjukkan `(healthy)`, biasanya 10–20 detik. Membuat topic
+sebelum broker siap tetap berhasil, tetapi diawali peringatan `Connection to node -1
+could not be established`.
+
+```powershell
+docker compose exec kafka /opt/kafka/bin/kafka-topics.sh --create --topic orders --bootstrap-server localhost:9092 --partitions 3 --replication-factor 1 --if-not-exists
+```
+
+Opsi `--if-not-exists` membuat perintah aman diulang. `docker compose stop` hanya
+mematikan container sehingga topic, pesan, dan offset tetap ada; `docker compose down`
+menghapus container beserta seluruh isinya karena compose ini tidak memakai volume.
 
 Jalankan consumer di terminal pertama, lalu producer di terminal kedua:
 
@@ -87,20 +111,31 @@ python scripts/producer.py --limit 36
 Uji duplikasi memakai topic dan folder sink tersendiri agar angkanya tidak tercampur:
 
 ```powershell
-docker compose exec kafka /opt/kafka/bin/kafka-topics.sh --create --topic orders-dup --bootstrap-server localhost:9092 --partitions 3 --replication-factor 1
+docker compose exec kafka /opt/kafka/bin/kafka-topics.sh --create --topic orders-dup --bootstrap-server localhost:9092 --partitions 3 --replication-factor 1 --if-not-exists
 python scripts/consumer.py --topic orders-dup --group orders-dup-test --out-dir data/stream_dup
 python scripts/producer.py --topic orders-dup --limit 10 --duplicate 10
 docker compose down
 ```
 
-**4. Benchmark dan skew**
+**4. Transformasi, benchmark, dan skew**
 
 ```powershell
+python scripts/transform.py
+python tests/test_transform.py
 python scripts/benchmark.py --factor 5000 --repeat 7
 python scripts/skew_experiment.py --factor 5000 --skew-ratio 0.8
 ```
 
-Dataset benchmark dibuat ulang di `data/bench/` dan tidak disimpan di repositori.
+`transform.py` menggabungkan record valid dari jalur batch dan streaming, membuang
+duplikat per `order_id`, menyeragamkan timestamp ke UTC, menghitung `gross_amount` dan
+`net_amount`, lalu menulis `data/transformed/orders_transformed.parquet`. Bila Tahap 3
+dilewati, skrip tetap berjalan memakai jalur batch saja.
+
+Tanggal order (`order_date`) dihitung dalam **UTC**, sesuai timestamp sumber yang
+berakhiran `Z`. Ini disengaja: bila tanggal diturunkan di dalam DuckDB, DuckDB memakai
+zona waktu mesin (misalnya `Asia/Jakarta`), sehingga order seperti O1018 (`06 Sept
+17:45 UTC`) bergeser ke 7 September dan angka penjualan harian berbeda antar-mesin. Dataset benchmark dibuat ulang
+di `data/bench/` dan tidak disimpan di repositori.
 
 **5. Warehouse dan dbt**
 
@@ -131,7 +166,8 @@ python scripts/run_queries.py
 | Idempotensi | 20 pesan (10 duplikat) menghasilkan 10 baris unik di sink |
 | Benchmark (180.000 baris, median 7 run) | Polars lazy 17,64 ms · Polars eager 28,83 ms · Pandas 334,22 ms |
 | Skew | Grup terbesar naik dari 11,1% ke 82,2%; `group_by` 22,57 ms menjadi 18,92 ms |
-| DuckDB | 30 baris dimuat, 0 pelanggar kontrak di warehouse |
+| Transformasi | 30 batch + 30 streaming = 60, setelah dedup 30 order; net_amount total 3.948,47 |
+| DuckDB | 30 baris hasil transformasi dimuat, 0 pelanggar kontrak di warehouse |
 | dbt | `dbt run` PASS=5, `dbt test` PASS=15 |
 | Analitik | Penjualan bersih diakui 3.412,02; kategori tertinggi Electronics; metode bayar terbanyak card |
 

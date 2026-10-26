@@ -1,4 +1,4 @@
-"""Memuat hanya record valid ke warehouse DuckDB."""
+"""Memuat hasil transformasi Polars (record valid batch + streaming) ke DuckDB."""
 import argparse
 from pathlib import Path
 
@@ -7,7 +7,7 @@ import duckdb
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--valid", default="data/valid/valid_orders.parquet")
+    ap.add_argument("--source", default="data/transformed/orders_transformed.parquet")
     ap.add_argument("--db", default="warehouse/warehouse.duckdb")
     args = ap.parse_args()
 
@@ -16,7 +16,7 @@ def main():
     con.execute("CREATE SCHEMA IF NOT EXISTS raw;")
     con.execute(f"""
         CREATE OR REPLACE TABLE raw.orders AS
-        SELECT * FROM read_parquet('{Path(args.valid).as_posix()}');
+        SELECT * FROM read_parquet('{Path(args.source).as_posix()}');
     """)
 
     n = con.execute("SELECT COUNT(*) FROM raw.orders").fetchone()[0]
