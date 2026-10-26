@@ -1,0 +1,50 @@
+﻿======================================================================
+1. Nilai penjualan bersih per hari
+----------------------------------------------------------------------
+order_date  net_sales
+2026-09-01     363.57
+2026-09-02     196.42
+2026-09-03     110.00
+2026-09-04     156.60
+2026-09-05     275.60
+2026-09-06    1022.60
+2026-09-07     192.46
+2026-09-08     285.48
+2026-09-09     244.00
+2026-09-10     565.30
+
+======================================================================
+2. Kategori produk dengan penjualan bersih tertinggi
+----------------------------------------------------------------------
+product_category  net_sales
+     Electronics    1605.12
+            Home     996.98
+         Fashion     573.20
+           Books     236.73
+
+======================================================================
+3. Jumlah dan nilai pesanan menurut status
+----------------------------------------------------------------------
+   status  order_count  total_net_amount
+     paid           20           2443.85
+  shipped            8            968.18
+cancelled            1             62.40
+ refunded            1            474.05
+
+======================================================================
+4. Metode pembayaran paling sering digunakan
+----------------------------------------------------------------------
+payment_method  order_count
+          card           14
+      transfer            8
+       ewallet            8
+
+======================================================================
+5. Total penjualan bersih yang diakui (paid dan shipped)
+----------------------------------------------------------------------
+ net_sales_diakui
+          3412.02
+
+Catatan: pertanyaan nomor 5 pada brief soal record yang ditolak kontrak
+dijawab dari data/rejected/rejected_orders.csv, bukan dari warehouse,
+karena record cacat memang tidak pernah dimuat ke dalamnya.
