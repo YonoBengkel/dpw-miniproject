@@ -1,0 +1,7 @@
+raw (batch_ingest)         baris= 36  order_id unik= 36  duplikat=0
+valid (validate)           baris= 30  order_id unik= 30  duplikat=0
+transformed (transform)    baris= 30  order_id unik= 30  duplikat=0
+warehouse raw.orders       baris= 30  order_id unik= 30  duplikat=0
+dbt fct_orders             baris= 30  order_id unik= 30  duplikat=0
+
+ringkasan: dibaca 36 | valid 30 | ditolak 6 | ditambahkan ke warehouse 30

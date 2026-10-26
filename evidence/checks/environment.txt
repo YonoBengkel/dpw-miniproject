@@ -1,0 +1,6 @@
+OS        : Windows-11-10.0.26300-SP0
+Prosesor  : AMD64 Family 25 Model 117 Stepping 2, AuthenticAMD
+Core log. : 16
+RAM       : 12.8 GB
+Python    : 3.14.5
+pandas 3.0.6 | polars 2.0.0 | pyarrow 26.0.0 | pydantic 2.14.1 | duckdb 1.5.6

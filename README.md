@@ -41,12 +41,15 @@ yang diuji dan didokumentasikan.
 │   ├── benchmark.py           Pandas vs Polars eager vs Polars lazy
 │   ├── skew_experiment.py     eksperimen data skew
 │   ├── load_duckdb.py         memuat hasil transformasi ke warehouse
-│   └── run_queries.py         lima pertanyaan analitik wajib
+│   ├── run_queries.py         lima pertanyaan analitik wajib
+│   └── verify_outputs.py      pemeriksaan ulang keluaran, menulis evidence/checks/
 ├── tests/test_transform.py    tes kecil untuk transform.py
 ├── warehouse/warehouse.duckdb
 ├── dbt_project/               model staging, dimensi, fakta, mart, dan tes
 ├── docs/pipeline.png          diagram arsitektur
-└── evidence/                  tangkapan layar hasil eksekusi (E01–E12 dan langkah lain)
+├── evidence/                  tangkapan layar hasil eksekusi (E01–E12 dan langkah lain)
+│   └── checks/                hasil verify_outputs.py
+└── laporan/                   laporan DPW7 (.docx dan .pdf)
 ```
 
 ## Menjalankan Ulang
@@ -153,7 +156,11 @@ dbt docs generate
 dbt docs serve
 cd ..
 python scripts/run_queries.py
+python scripts/verify_outputs.py
 ```
+
+`verify_outputs.py` memeriksa ulang keluaran setiap lapisan (jumlah order unik, hitungan
+transformasi, agregasi harian, join star schema) dan menulis hasilnya ke `evidence/checks/`.
 
 ## Ringkasan Hasil
 
@@ -194,6 +201,7 @@ Folder `evidence/` berisi tangkapan layar asli. Bukti wajib mengikuti penamaan E
 | E12 | Dokumentasi dan lineage dbt |
 
 Berkas berawalan `T<tahap><langkah>` merekam langkah lain seperti kode dan persiapan.
+Folder `evidence/checks/` berisi hasil `verify_outputs.py` dalam bentuk teks dan CSV.
 
 ## Batas Jaminan dan Keterbatasan
 

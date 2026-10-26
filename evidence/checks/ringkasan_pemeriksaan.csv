@@ -1,0 +1,7 @@
+pemeriksaan,hasil,keterangan
+raw Parquet terbaca ulang,LULUS,36 baris
+tidak ada order_id ganda di setiap lapisan,LULUS,"raw 36, lapisan lain 30"
+gross dan net amount sesuai hitung manual,LULUS,30/30 baris cocok
+mart_daily_sales sama dengan hitungan manual,LULUS,total 3412.03
+join fakta-dimensi utuh,LULUS,30 baris
+6 record ditolak dengan alasan berbeda,LULUS,6 ditolak

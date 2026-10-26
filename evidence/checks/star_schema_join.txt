@@ -1,0 +1,18 @@
+fct_orders JOIN dim_customer JOIN dim_product_category
+baris hasil join : 30 (fct_orders 30)
+fakta tanpa dimensi pelanggan : 0
+
+grain fct_orders : satu baris per order_id
+key              : customer_id -> dim_customer, product_category -> dim_product_category
+
+order_id order_date customer_id  order_pelanggan product_category  net_amount
+   O1001 2026-09-01        C001                4      Electronics     237.500
+   O1002 2026-09-01        C002                2             Home      91.000
+   O1003 2026-09-01        C003                2            Books      35.073
+   O1004 2026-09-02        C001                4      Electronics      76.415
+   O1005 2026-09-02        C004                1          Fashion      62.400
+   O1006 2026-09-02        C005                1             Home     120.000
+   O1007 2026-09-03        C006                1            Books      42.500
+   O1008 2026-09-03        C002                2          Fashion      67.500
+   O1009 2026-09-03        C007                1      Electronics     474.050
+   O1010 2026-09-04        C008                1             Home      63.000
